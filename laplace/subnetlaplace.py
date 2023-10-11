@@ -4,7 +4,7 @@ from torch.distributions import MultivariateNormal
 from laplace.baselaplace import ParametricLaplace, FullLaplace, DiagLaplace
 
 
-__all__ = ['SubnetLaplace', 'FullSubnetLaplace', 'DiagSubnetLaplace']
+__all__ = ['SubnetLaplace', 'FullSubnetLaplace', 'DiagSubnetLaplace', 'SubnetLaplaceNLP']
 
 
 class SubnetLaplace(ParametricLaplace):
@@ -124,6 +124,87 @@ class SubnetLaplace(ParametricLaplace):
         full_samples = self.mean.repeat(subnet_samples.shape[0], 1)
         full_samples[:, self.backend.subnetwork_indices] = subnet_samples
         return full_samples
+
+class SubnetLaplaceNLP(SubnetLaplace, FullLaplace):
+    _key = ('subnetworknlp', 'full')
+
+    def __init__(self, model, likelihood, subnetwork_indices, sigma_noise=1., prior_precision=1.,
+                 prior_mean=0., temperature=1., backend=None, backend_kwargs=None):
+        self.H = None
+        super().__init__(model, likelihood, sigma_noise=sigma_noise,
+                         prior_precision=prior_precision, prior_mean=prior_mean,
+                         temperature=temperature, backend=backend, backend_kwargs=backend_kwargs)
+        # check validity of subnetwork indices and pass them to backend
+        self._check_subnetwork_indices(subnetwork_indices)
+        self.backend.subnetwork_indices = subnetwork_indices
+        self.n_params_subnet = len(subnetwork_indices)
+        self._init_H()
+
+    def fit(self, train_loader, override = True):
+
+        """Fit the local Laplace approximation at the parameters of the model.
+        The model is a Huggingface (nn.Module) that takes a dict as input and returns a datatype
+        incompatible with the ParametricLaplace fit() function
+
+        Parameters
+        ----------
+        train_loader : torch.data.utils.DataLoader
+            each iterate is a training batch (X, y);
+            `train_loader.dataset` needs to be set to access \\(N\\), size of the data set
+        override : bool, default=True
+            whether to initialize H, loss, and n_data again; setting to False is useful for
+            online learning settings to accumulate a sequential posterior approximation.
+        """
+        if override:
+            self._init_H()
+            self.loss = 0
+            self.n_data = 0
+
+        self.model.eval()
+        self.mean = torch.nn.utils.parameters_to_vector(self.model.parameters()).detach()
+
+        self.n_outputs = 0
+        for module in self.model.modules():
+            if hasattr(module, 'out_features'):
+                self.n_outputs = module.out_features
+
+        setattr(self.model, 'output_size', self.n_outputs)
+
+        N = len(train_loader.dataset)
+        for step, inp in enumerate(train_loader):
+            self.model.zero_grad()
+            # X, y = X.to(self._device), y.to(self._device)
+            inp = inp.to(self._device)
+            loss_batch, H_batch = self._curv_closure(inp, inp.labels, N)
+            self.loss += loss_batch
+            self.H += H_batch
+
+        self.n_data += N
+
+    def _init_H(self):
+        self.H = torch.zeros(self.n_params_subnet, self.n_params_subnet, device=self._device)
+
+    def _check_subnetwork_indices(self, subnetwork_indices):
+        """Check that subnetwork indices are valid indices of the vectorized model parameters
+           (i.e. `torch.nn.utils.parameters_to_vector(model.parameters())`).
+        """
+        if subnetwork_indices is None:
+            raise ValueError('Subnetwork indices cannot be None.')
+        elif not (isinstance(subnetwork_indices, torch.LongTensor) and
+                  subnetwork_indices.numel() > 0 and len(subnetwork_indices.shape) == 1):
+            raise ValueError('Subnetwork indices must be non-empty 1-dimensional torch.LongTensor.')
+        elif not (len(subnetwork_indices[subnetwork_indices < 0]) == 0 and
+                  len(subnetwork_indices[subnetwork_indices >= self.n_params]) == 0):
+            raise ValueError(f'Subnetwork indices must lie between 0 and n_params={self.n_params}.')
+        elif not (len(subnetwork_indices.unique()) == len(subnetwork_indices)):
+            raise ValueError('Subnetwork indices must not contain duplicate entries.')
+
+
+    def sample(self, n_samples=100):
+        # sample only subnetwork parameters and set all other parameters to their MAP estimates
+        dist = MultivariateNormal(loc=self.mean_subnet, scale_tril=self.posterior_scale)
+        subnet_samples = dist.sample((n_samples,))
+        return self.assemble_full_samples(subnet_samples)
 
 
 class FullSubnetLaplace(SubnetLaplace, FullLaplace):

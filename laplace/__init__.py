@@ -20,4 +20,4 @@ __all__ = ['Laplace',  # direct access to all Laplace classes via unified interf
            'FullLLLaplace', 'KronLLLaplace', 'DiagLLLaplace',  # last-layer
            'SubnetLaplace',  # base-class subnetwork
            'FullSubnetLaplace', 'DiagSubnetLaplace',  # subnetwork
-           'marglik_training']  # methods
+           'marglik_training', '']  # methods
