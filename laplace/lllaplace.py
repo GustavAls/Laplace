@@ -2,8 +2,8 @@ from copy import deepcopy
 import torch
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
-from laplace.baselaplace import ParametricLaplace, FullLaplace, KronLaplace, DiagLaplace
-from laplace.utils import FeatureExtractor, Kron
+from Laplace.laplace.baselaplace import ParametricLaplace, FullLaplace, KronLaplace, DiagLaplace
+from Laplace.laplace.utils import FeatureExtractor, Kron
 
 
 __all__ = ['LLLaplace', 'FullLLLaplace', 'KronLLLaplace', 'DiagLLLaplace']
@@ -49,7 +49,7 @@ class LLLaplace(ParametricLaplace):
     enable_backprop: bool, default=False
         whether to enable backprop to the input `x` through the Laplace predictive.
         Useful for e.g. Bayesian optimization.
-    backend : subclasses of `laplace.curvature.CurvatureInterface`
+    backend : subclasses of `laplace_partial.curvature.CurvatureInterface`
         backend for access to curvature/Hessian approximations
     last_layer_name: str, default=None
         name of the model's last layer, if None it will be determined automatically
@@ -182,7 +182,7 @@ class KronLLLaplace(LLLaplace, KronLaplace):
     Mathematically, we have for the last parameter group, i.e., torch.nn.Linear,
     that \\P\\approx Q \\otimes H\\.
     See `KronLaplace`, `LLLaplace`, and `BaseLaplace` for the full interface and see
-    `laplace.utils.matrix.Kron` and `laplace.utils.matrix.KronDecomposed` for the structure of
+    `laplace_partial.utils.matrix.Kron` and `laplace_partial.utils.matrix.KronDecomposed` for the structure of
     the Kronecker factors. `Kron` is used to aggregate factors by summing up and
     `KronDecomposed` is used to add the prior, a Hessian factor (e.g. temperature),
     and computing posterior covariances, marginal likelihood, etc.

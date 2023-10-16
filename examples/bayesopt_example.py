@@ -41,7 +41,7 @@ from typing import (
 class LaplaceBNN(Model):
     """
     Install first:
-    pip install laplace-torch
+    pip install laplace_partial-torch
     """
 
     def __init__(

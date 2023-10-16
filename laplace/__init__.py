@@ -7,11 +7,11 @@
 REGRESSION = 'regression'
 CLASSIFICATION = 'classification'
 
-from laplace.baselaplace import BaseLaplace, ParametricLaplace, FullLaplace, KronLaplace, DiagLaplace, LowRankLaplace
-from laplace.lllaplace import LLLaplace, FullLLLaplace, KronLLLaplace, DiagLLLaplace
-from laplace.subnetlaplace import SubnetLaplace, FullSubnetLaplace, DiagSubnetLaplace
-from laplace.laplace import Laplace
-from laplace.marglik_training import marglik_training
+from Laplace.laplace.baselaplace import BaseLaplace, ParametricLaplace, FullLaplace, KronLaplace, DiagLaplace, LowRankLaplace
+from Laplace.laplace.lllaplace import LLLaplace, FullLLLaplace, KronLLLaplace, DiagLLLaplace
+from Laplace.laplace.subnetlaplace import SubnetLaplace, FullSubnetLaplace, DiagSubnetLaplace
+from Laplace.laplace.laplace import Laplace
+from Laplace.laplace.marglik_training import marglik_training
 
 __all__ = ['Laplace',  # direct access to all Laplace classes via unified interface
            'BaseLaplace', 'ParametricLaplace',  # base-class and its (first-level) subclasses

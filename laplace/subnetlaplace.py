@@ -1,7 +1,7 @@
 import torch
 from torch.distributions import MultivariateNormal
 
-from laplace.baselaplace import ParametricLaplace, FullLaplace, DiagLaplace
+from Laplace.laplace.baselaplace import ParametricLaplace, FullLaplace, DiagLaplace
 
 
 __all__ = ['SubnetLaplace', 'FullSubnetLaplace', 'DiagSubnetLaplace', 'SubnetLaplaceNLP']
@@ -59,7 +59,7 @@ class SubnetLaplace(ParametricLaplace):
     temperature : float, default=1
         temperature of the likelihood; lower temperature leads to more
         concentrated posterior and vice versa.
-    backend : subclasses of `laplace.curvature.CurvatureInterface`
+    backend : subclasses of `laplace_partial.curvature.CurvatureInterface`
         backend for access to curvature/Hessian approximations
     backend_kwargs : dict, default=None
         arguments passed to the backend on initialization, for example to

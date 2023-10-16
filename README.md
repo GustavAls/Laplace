@@ -164,7 +164,7 @@ pip install -e .[docs]
 # create docs and write to html
 bash update_docs.sh
 # .. or serve the docs directly
-pdoc --http 0.0.0.0:8080 laplace --template-dir template
+pdoc --http 0.0.0.0:8080 laplace_partial --template-dir template
 ```
 
 ## References

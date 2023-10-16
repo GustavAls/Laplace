@@ -7,9 +7,9 @@ from torch.nn.utils import parameters_to_vector
 import warnings
 import logging
 
-from laplace import Laplace
-from laplace.curvature import AsdlGGN
-from laplace.utils import expand_prior_precision, fix_prior_prec_structure
+from Laplace.laplace import Laplace
+from Laplace.laplace.curvature import AsdlGGN
+from Laplace.laplace.utils import expand_prior_precision, fix_prior_prec_structure
 
 
 def marglik_training(
@@ -207,7 +207,7 @@ def marglik_training(
             continue
 
         # optimizer hyperparameters by differentiating marglik
-        # 1. fit laplace approximation
+        # 1. fit laplace_partial approximation
         sigma_noise = 1 if likelihood == 'classification' else torch.exp(log_sigma_noise)
         prior_prec = torch.exp(log_prior_prec)
         lap = Laplace(

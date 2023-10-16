@@ -4,10 +4,10 @@ import torch
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 from torch.distributions import MultivariateNormal, Dirichlet, Normal
 
-from laplace.utils import (parameters_per_layer, invsqrt_precision, 
+from Laplace.laplace.utils import (parameters_per_layer, invsqrt_precision,
                            get_nll, validate, Kron, normal_samples,
                            fix_prior_prec_structure)
-from laplace.curvature import AsdlGGN, BackPackGGN, AsdlHessian
+from Laplace.laplace.curvature import AsdlGGN, BackPackGGN, AsdlHessian
 
 
 __all__ = ['BaseLaplace', 'ParametricLaplace',
@@ -35,7 +35,7 @@ class BaseLaplace:
     enable_backprop: bool, default=False
         whether to enable backprop to the input `x` through the Laplace predictive.
         Useful for e.g. Bayesian optimization.
-    backend : subclasses of `laplace.curvature.CurvatureInterface`
+    backend : subclasses of `laplace_partial.curvature.CurvatureInterface`
         backend for access to curvature/Hessian approximations
     backend_kwargs : dict, default=None
         arguments passed to the backend on initialization, for example to
@@ -411,6 +411,9 @@ class ParametricLaplace(BaseLaplace):
             X, y = X.to(self._device), y.to(self._device)
             loss_batch, H_batch = self._curv_closure(X, y, N)
             self.loss += loss_batch
+            if not isinstance(H_batch, type(self.H)):
+                H_batch = Kron(H_batch.kfacs)
+
             self.H += H_batch
 
         self.n_data += N
@@ -865,7 +868,7 @@ class KronLaplace(ParametricLaplace):
     Mathematically, we have for each parameter group, e.g., torch.nn.Module,
     that \\P\\approx Q \\otimes H\\.
     See `BaseLaplace` for the full interface and see
-    `laplace.utils.matrix.Kron` and `laplace.utils.matrix.KronDecomposed` for the structure of
+    `laplace_partial.utils.matrix.Kron` and `laplace_partial.utils.matrix.KronDecomposed` for the structure of
     the Kronecker factors. `Kron` is used to aggregate factors by summing up and
     `KronDecomposed` is used to add the prior, a Hessian factor (e.g. temperature),
     and computing posterior covariances, marginal likelihood, etc.

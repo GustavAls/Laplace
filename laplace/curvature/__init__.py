@@ -1,14 +1,14 @@
 import logging
 
-from laplace.curvature.curvature import CurvatureInterface, GGNInterface, EFInterface
+from Laplace.laplace.curvature.curvature import CurvatureInterface, GGNInterface, EFInterface
 
 try:
-    from laplace.curvature.backpack import BackPackGGN, BackPackEF, BackPackInterface
+    from Laplace.laplace.curvature.backpack import BackPackGGN, BackPackEF, BackPackInterface
 except ModuleNotFoundError:
     logging.info('Backpack not available.')
 
 try:
-    from laplace.curvature.asdl import AsdlHessian, AsdlGGN, AsdlEF, AsdlInterface
+    from Laplace.laplace.curvature.asdl import AsdlHessian, AsdlGGN, AsdlEF, AsdlInterface
 except ModuleNotFoundError:
     logging.info('asdfghjkl backend not available.')
 

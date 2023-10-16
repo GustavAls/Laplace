@@ -1,5 +1,5 @@
-from laplace.baselaplace import ParametricLaplace
-from laplace import *
+from Laplace.laplace.baselaplace import ParametricLaplace
+from Laplace.laplace import *
 
 
 def Laplace(model, likelihood, subset_of_weights='last_layer', hessian_structure='kron',
@@ -17,7 +17,7 @@ def Laplace(model, likelihood, subset_of_weights='last_layer', hessian_structure
 
     Returns
     -------
-    laplace : ParametricLaplace
+    laplace_partial : ParametricLaplace
         chosen subclass of ParametricLaplace instantiated with additional arguments
     """
     if subset_of_weights == 'subnetwork' and hessian_structure not in ['full', 'diag']:

@@ -29,7 +29,7 @@ def test_default_init(model, likelihood='classification'):
     assert isinstance(lap, KronLLLaplace)
 
 
-@pytest.mark.parametrize('laplace, key', zip(flavors, all_keys))
+@pytest.mark.parametrize('laplace_partial, key', zip(flavors, all_keys))
 def test_all_init(laplace, key, model, likelihood='classification'):
     # test if all flavors are correctly initialized
     w, s = key

@@ -45,7 +45,7 @@ def reg_loader():
     return DataLoader(TensorDataset(X, y), batch_size=3)
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_init(laplace, model):
     lap = laplace(model, 'classification', last_layer_name='1')
     assert torch.allclose(lap.mean, lap.prior_mean)
@@ -61,14 +61,14 @@ def test_laplace_init(laplace, model):
                 assert torch.allclose(k1, k2)
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_init_nollname(laplace, model):
     lap = laplace(model, 'classification')
     assert lap.mean is None
     assert lap.H is None
 
 
-@pytest.mark.parametrize('laplace', [KronLLLaplace, DiagLLLaplace])
+@pytest.mark.parametrize('laplace_partial', [KronLLLaplace, DiagLLLaplace])
 def test_laplace_large_init(laplace, large_model):
     lap = laplace(large_model, 'classification', last_layer_name='fc')
     assert torch.allclose(lap.mean, lap.prior_mean)
@@ -84,20 +84,20 @@ def test_laplace_large_init(laplace, large_model):
                 assert torch.allclose(k1, k2)
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_large_init_nollname(laplace, large_model):
     lap = laplace(large_model, 'classification')
     assert lap.mean is None
     assert lap.H is None
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_invalid_likelihood(laplace, model):
     with pytest.raises(ValueError):
         lap = laplace(model, 'otherlh', last_layer_name='1')
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_init_noise(laplace, model):
     # float
     sigma_noise = 1.2
@@ -131,7 +131,7 @@ def test_laplace_init_noise(laplace, model):
                       last_layer_name='1')
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_init_precision(laplace, model):
     feature_extractor = FeatureExtractor(model, last_layer_name='1')
     model_params = list(feature_extractor.last_layer.parameters())
@@ -182,7 +182,7 @@ def test_laplace_init_precision(laplace, model):
                       last_layer_name='1')
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_init_prior_mean_and_scatter(laplace, model, class_loader):
     lap_scalar_mean = laplace(model, 'classification', last_layer_name='1',
                               prior_precision=1e-2, prior_mean=1.)
@@ -228,7 +228,7 @@ def test_laplace_init_prior_mean_and_scatter(laplace, model, class_loader):
                 prior_precision=1e-2, prior_mean='72')
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_laplace_init_temperature(laplace, model):
     # valid float
     T = 1.1
@@ -237,7 +237,7 @@ def test_laplace_init_temperature(laplace, model):
     assert lap.temperature == T
 
 
-@pytest.mark.parametrize('laplace,lh', product(flavors, ['classification', 'regression']))
+@pytest.mark.parametrize('laplace_partial,lh', product(flavors, ['classification', 'regression']))
 def test_laplace_functionality(laplace, lh, model, reg_loader, class_loader):
     if lh == 'classification':
         loader = class_loader
@@ -316,7 +316,7 @@ def test_laplace_functionality(laplace, lh, model, reg_loader, class_loader):
     assert torch.allclose(true_f_var, comp_f_var, rtol=1e-4)
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_regression_predictive(laplace, model, reg_loader):
     lap = laplace(model, 'regression', sigma_noise=0.3, prior_precision=0.7)
     lap.fit(reg_loader)
@@ -340,7 +340,7 @@ def test_regression_predictive(laplace, model, reg_loader):
     assert len(f_mu) == len(X)
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_classification_predictive(laplace, model, class_loader):
     lap = laplace(model, 'classification', prior_precision=0.7)
     lap.fit(class_loader)
@@ -371,7 +371,7 @@ def test_classification_predictive(laplace, model, class_loader):
     assert torch.allclose(f_pred.sum(), torch.tensor(len(f_pred), dtype=torch.double))  # sum up to 1
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_regression_predictive_samples(laplace, model, reg_loader):
     lap = laplace(model, 'regression', sigma_noise=0.3, prior_precision=0.7)
     lap.fit(reg_loader)
@@ -391,7 +391,7 @@ def test_regression_predictive_samples(laplace, model, reg_loader):
     assert fsamples.shape == torch.Size([100, f.shape[0], f.shape[1]])
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_classification_predictive_samples(laplace, model, class_loader):
     lap = laplace(model, 'classification', prior_precision=0.7)
     lap.fit(class_loader)
@@ -413,7 +413,7 @@ def test_classification_predictive_samples(laplace, model, class_loader):
     assert np.allclose(fsamples.sum().item(), len(f) * 100)  # sum up to 1
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_backprop_glm(laplace, model, reg_loader):
     X, y = reg_loader.dataset.tensors
     X.requires_grad = True
@@ -432,7 +432,7 @@ def test_backprop_glm(laplace, model, reg_loader):
         assert False
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_backprop_glm_joint(laplace, model, reg_loader):
     X, y = reg_loader.dataset.tensors
     X.requires_grad = True
@@ -451,7 +451,7 @@ def test_backprop_glm_joint(laplace, model, reg_loader):
         assert False
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_backprop_glm_mc(laplace, model, reg_loader):
     X, y = reg_loader.dataset.tensors
     X.requires_grad = True
@@ -470,7 +470,7 @@ def test_backprop_glm_mc(laplace, model, reg_loader):
         assert False
 
 
-@pytest.mark.parametrize('laplace', flavors)
+@pytest.mark.parametrize('laplace_partial', flavors)
 def test_backprop_nn(laplace, model, reg_loader):
     X, y = reg_loader.dataset.tensors
     X.requires_grad = True
