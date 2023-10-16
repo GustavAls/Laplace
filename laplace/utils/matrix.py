@@ -4,7 +4,7 @@ import numpy as np
 from typing import Union
 import opt_einsum as oe 
 
-from laplace.utils import _is_valid_scalar, symeig, kron, block_diag
+from Laplace.laplace.utils import _is_valid_scalar, symeig, kron, block_diag
 
 
 __all__ = ['Kron', 'KronDecomposed']

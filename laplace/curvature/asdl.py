@@ -8,8 +8,8 @@ from asdfghjkl import fisher_for_cross_entropy
 from asdfghjkl.hessian import hessian_eigenvalues, hessian_for_loss
 from asdfghjkl.gradient import batch_gradient
 
-from laplace.curvature import CurvatureInterface, GGNInterface, EFInterface
-from laplace.utils import Kron, _is_batchnorm
+from Laplace.laplace.curvature import CurvatureInterface, GGNInterface, EFInterface
+from Laplace.laplace.utils import Kron, _is_batchnorm
 
 EPS = 1e-6
 

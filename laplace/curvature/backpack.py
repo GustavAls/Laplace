@@ -4,8 +4,8 @@ from backpack import backpack, extend, memory_cleanup
 from backpack.extensions import DiagGGNExact, DiagGGNMC, KFAC, KFLR, SumGradSquared, BatchGrad
 from backpack.context import CTX
 
-from laplace.curvature import CurvatureInterface, GGNInterface, EFInterface
-from laplace.utils import Kron
+from Laplace.laplace.curvature import CurvatureInterface, GGNInterface, EFInterface
+from Laplace.laplace.utils import Kron
 
 
 class BackPackInterface(CurvatureInterface):
